@@ -4,6 +4,7 @@ const midi = require('midi');
 const urls = [
    "http://stream2.srr.ro:8022",
    "https://listen2.argentinetangoradio.com",
+   "https://tsfjazz.ice.infomaniak.ch/tsfjazz-high.mp3",
    "../music/Beatles\ 1969\ -\ Abbey\ Road/list.m3u",
  "../music/Beethoven61/list.m3u",
  "../music/Cesaria/Cesaria Evora - Anthologie Mornas & Coladeras (2002)/list.m3u",
@@ -22,7 +23,7 @@ const urls = [
  "../music/Cesaria/Cesaria Evora-Voz D'Amor/list.m3u",
 "../music/Cesaria/Evora Live Lugano July 1997/list.m3u"
 ];
-const stations = [56,57,58,59,60,52,44,36,28,20,12,4,61,53,45,37,29,21,13]
+const stations = [56,57,58,59,61,60,52,44,36,28,20,12,4,61,53,45,37,29,21,13]
 var paused = false;
 const output = new midi.Output();
 output.openPort(1);
@@ -89,6 +90,7 @@ app.get("/", function(request, response) {
 
 app.get("/0", function(req,res) { playStation(0); res.send("ok"); });
 app.get("/1", function(req,res) { playStation(1); res.send("ok"); });
+app.get("/2", function(req,res) { playStation(2); res.send("ok"); });
 app.get("/vol/:vol", function(req,res) { var vol = req.params.vol; setVolume(vol); console.log("volume "+vol); res.send("ok"); });
 app.get("/pause", function(req,res) { pauseStation(); res.send("ok"); });
 
