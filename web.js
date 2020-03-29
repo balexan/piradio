@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const midi = require('midi');
+const fs = require('fs');
 const urls = [
    "http://stream2.srr.ro:8022",
    "https://listen2.argentinetangoradio.com",
@@ -43,10 +44,18 @@ var playStation = function(which){
    if (!player) {
       var Omx = require('node-omxplayer');
       player = Omx();
+      player.on('close',function() {
+         console.log('closed');
+         playStation(which);
+      });
+      player.on('error', function() {
+         console.log('player error');
+      });
    }
       
    if (playing > -1) output.sendMessage([144,stations[playing],0]);
    playing = which;
+   fs.writeFile("playing", playing, function() {});
    paused = false;
    player.newSource(urls[which],'alsa');
    output.sendMessage([144,stations[playing],1]);
@@ -54,9 +63,16 @@ var playStation = function(which){
 
 var pauseStation = function(){
    paused = !paused;
+   fs.writeFile("playing", paused ? -1 : playing, function() {});
    player.play();
    output.sendMessage([144,stations[playing],paused ? 0 : 1]);
 }
+
+try {
+  var test = fs.readFileSync('playing', 'utf8', function() {}); 
+  console.log("restarting "+test);
+  if (test  > -1) playStation(test);
+} catch (e) {}
 
 input.on('message', (deltaTime, message) => {
    if (message[0]==144) {
