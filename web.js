@@ -41,21 +41,25 @@ async function setVolume(vol) {
 }
 
 var playStation = function(which){
-   if (!player) {
+   if (playing > -1) output.sendMessage([144,stations[playing],0]);
+   playing = which;
+   fs.writeFileSync("playing", playing, function() {});
+   process.exit(1);
+}
+
+var playAfterRestart=function(which){
       var Omx = require('node-omxplayer');
       player = Omx();
       player.on('close',function() {
-         console.log('closed');
-         playStation(which);
+         if (playing > -1) output.sendMessage([144,stations[playing],0]);
+         process.exit(1);
       });
       player.on('error', function() {
          console.log('player error');
-      });
-   }
-      
-   if (playing > -1) output.sendMessage([144,stations[playing],0]);
+         if (playing > -1) output.sendMessage([144,stations[playing],0]);
+         process.exit(1);
+      }); 
    playing = which;
-   fs.writeFile("playing", playing, function() {});
    paused = false;
    player.newSource(urls[which],'alsa');
    output.sendMessage([144,stations[playing],1]);
