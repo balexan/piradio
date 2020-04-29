@@ -40,42 +40,32 @@ async function setVolume(vol) {
   if (stderr) console.log('stderr:', stderr);
 }
 
-var playStation = function(which){
+async function playStation(which){
    if (playing > -1) output.sendMessage([144,stations[playing],0]);
+   exec('mpc play '+(which+1));
    playing = which;
    fs.writeFileSync("playing", playing, function() {});
-   process.exit(1);
+   output.sendMessage([144,stations[playing],1]);
 }
 
 var playAfterRestart=function(which){
-      var Omx = require('node-omxplayer');
-      player = Omx();
-      player.on('close',function() {
-         if (playing > -1) output.sendMessage([144,stations[playing],0]);
-         process.exit(1);
-      });
-      player.on('error', function() {
-         console.log('player error');
-         if (playing > -1) output.sendMessage([144,stations[playing],0]);
-         process.exit(1);
-      }); 
    playing = which;
    paused = false;
-   player.newSource(urls[which],'alsa');
    output.sendMessage([144,stations[playing],1]);
+   exec('mpc play '+(which+1));
 }
 
 var pauseStation = function(){
    paused = !paused;
    fs.writeFile("playing", paused ? -1 : playing, function() {});
-   player.play();
+   exec('mpc '+(paused ? 'pause' : 'play'));
    output.sendMessage([144,stations[playing],paused ? 0 : 1]);
 }
 
 try {
   var test = fs.readFileSync('playing', 'utf8', function() {}); 
   console.log("restarting "+test);
-  if (test  > -1) playStation(test);
+  if (test  > -1) playAfterRestart(test);
 } catch (e) {}
 
 input.on('message', (deltaTime, message) => {
