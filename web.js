@@ -6,7 +6,8 @@ const urls = [
    "http://stream2.srr.ro:8022",
    "https://listen2.argentinetangoradio.com",
    "https://tsfjazz.ice.infomaniak.ch/tsfjazz-high.mp3",
-   "../music/Beatles\ 1969\ -\ Abbey\ Road/list.m3u",
+   "https://s2.radio.co/sef98c1b5f/listen",
+//   "../music/Beatles\ 1969\ -\ Abbey\ Road/list.m3u",
  "../music/Beethoven61/list.m3u",
  "../music/Cesaria/Cesaria Evora - Anthologie Mornas & Coladeras (2002)/list.m3u",
  "../music/Cesaria/Cesaria Evora - Cabo Verde/list.m3u",
@@ -70,6 +71,9 @@ try {
 
 input.on('message', (deltaTime, message) => {
    if (message[0]==144) {
+      if (message[1]==7){
+         exec("sudo shutdown -r now");
+      }
       for (var i=0; i<stations.length; i++){
          if (message[1]==stations[i]) {
             if (i != playing){
@@ -101,9 +105,10 @@ app.get("/", function(request, response) {
 app.get("/0", function(req,res) { playStation(0); res.send("ok"); });
 app.get("/1", function(req,res) { playStation(1); res.send("ok"); });
 app.get("/2", function(req,res) { playStation(2); res.send("ok"); });
+app.get("/3", function(req,res) { playStation(3); res.send("ok"); });
 app.get("/vol/:vol", function(req,res) { var vol = req.params.vol; setVolume(vol); console.log("volume "+vol); res.send("ok"); });
 app.get("/pause", function(req,res) { pauseStation(); res.send("ok"); });
-
+app.get("/status",function(req,res) {exec("mpc status",(err,stdout,stderr)=>{res.send(stdout)})})
 
 const listener = app.listen(
 80, function() {
