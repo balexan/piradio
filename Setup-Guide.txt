@@ -49,4 +49,8 @@ sudo reboot
 
 sudo systemctl restart piradio.service
 
+https://pimylifeup.com/raspberry-pi-spotify/
+https://appcodelabs.com/7-easy-steps-to-apple-airplay-on-raspberry-pi
+
+
 
