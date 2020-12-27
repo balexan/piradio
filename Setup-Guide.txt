@@ -31,3 +31,22 @@ pi@raspberrypi:~/piradio $ mpc save internetradio
 TODO: Look at http://tinycorelinux.net/ports.html
 
 
+https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-startup/
+sudo nano /lib/systemd/system/piradio.service
+ [Unit]
+ Description=Pi Radio
+ After=multi-user.target
+
+ [Service]
+ Type=idle
+ ExecStart=/usr/bin/node /home/pi/piradio/web
+
+ [Install]
+ WantedBy=multi-user.target
+
+sudo chmod 644 /lib/systemd/system/piradio.service 
+sudo reboot
+
+sudo systemctl restart piradio.service
+
+

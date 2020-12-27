@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const midi = require('midi');
 //const fs = require('fs');
-const stations = [56,57,58,59,61,60,52,44,36,28,20,12,4,61,53,45,37,29,21,13]
+const stations = [56,57,58]
 var paused = false;
 const output = new midi.Output();
 output.openPort(1);
@@ -75,7 +75,7 @@ input.on('message', (deltaTime, message) => {
 input.openPort(1);
 input.ignoreTypes(true, true, true);
 
-app.use(express.static("public"));
+app.use(express.static("/home/pi/piradio/public"));
 
 app.get("/", function(request, response) {
   response.sendFile(__dirname + "/views/index.html");
@@ -84,7 +84,6 @@ app.get("/", function(request, response) {
 app.get("/0", function(req,res) { playStation(0); res.send("ok"); });
 app.get("/1", function(req,res) { playStation(1); res.send("ok"); });
 app.get("/2", function(req,res) { playStation(2); res.send("ok"); });
-app.get("/3", function(req,res) { playStation(3); res.send("ok"); });
 app.get("/vol/:vol", function(req,res) { var vol = req.params.vol; setVolume(vol); console.log("volume "+vol); res.send("ok"); });
 app.get("/pause", function(req,res) { pauseStation(); res.send("ok"); });
 app.get("/status",function(req,res) {exec("mpc status",(err,stdout,stderr)=>{res.send(stdout)})})
