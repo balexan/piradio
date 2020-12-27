@@ -1,0 +1,33 @@
+Imager from here https://www.raspberrypi.org/software/
+
+wpa_supplicant.conf in /boot:
+
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+country=DE
+
+network={
+ ssid="..."
+ psk="..."
+}
+
+git clone git@github.com:balexan/piradio.git
+sudo apt install nodejs
+ssh-keygen
+add key to github
+sudo apt-get install libasound2-dev
+sudo apt-get install alsa-utils
+sudo apt-get install mpd mpc
+sudo apt install node, npm
+sudo node web
+
+
+pi@raspberrypi:~/piradio $ mpc add http://stream2.srr.ro:8022
+pi@raspberrypi:~/piradio $ mpc add https://listen2.argentinetangoradio.com
+pi@raspberrypi:~/piradio $ mpc add https://tsfjazz.ice.infomaniak.ch/tsfjazz-high.mp3
+pi@raspberrypi:~/piradio $ mpc save internetradio
+
+
+TODO: Look at http://tinycorelinux.net/ports.html
+
+
