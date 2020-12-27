@@ -1,30 +1,7 @@
 const express = require("express");
 const app = express();
 const midi = require('midi');
-const fs = require('fs');
-const urls = [
-   "http://stream2.srr.ro:8022",
-   "https://listen2.argentinetangoradio.com",
-   "https://tsfjazz.ice.infomaniak.ch/tsfjazz-high.mp3",
-   "https://s2.radio.co/sef98c1b5f/listen",
-//   "../music/Beatles\ 1969\ -\ Abbey\ Road/list.m3u",
- "../music/Beethoven61/list.m3u",
- "../music/Cesaria/Cesaria Evora - Anthologie Mornas & Coladeras (2002)/list.m3u",
- "../music/Cesaria/Cesaria Evora - Cabo Verde/list.m3u",
- "../music/Cesaria/Cesaria Evora - Cafe Atlantico/list.m3u",
- "../music/Cesaria/Cesaria Evora - Cesaria/list.m3u",
- "../music/Cesaria/Cesaria Evora - La Diva Aux Pieds Nus/list.m3u",
- "../music/Cesaria/Cesaria Evora - Mar azul/list.m3u",
- "../music/Cesaria/Cesaria Evora - Rogamar/list.m3u",
- "../music/Cesaria/Cesaria Evora - Sao Vicente Di Longe (2001)/list.m3u",
- "../music/Cesaria/Cesaria Evora - Sodade/list.m3u",
- "../music/Cesaria/Cesaria Evora - The Best Of (1998)/list.m3u",
- "../music/Cesaria/Cesaria Evora Live a l'Olympia/list.m3u",
- "../music/Cesaria/Cesaria Evora-Miss Perfumado/list.m3u",
- "../music/Cesaria/Cesaria Evora-Nova Sintra/list.m3u",
- "../music/Cesaria/Cesaria Evora-Voz D'Amor/list.m3u",
-"../music/Cesaria/Evora Live Lugano July 1997/list.m3u"
-];
+//const fs = require('fs');
 const stations = [56,57,58,59,61,60,52,44,36,28,20,12,4,61,53,45,37,29,21,13]
 var paused = false;
 const output = new midi.Output();
@@ -45,7 +22,7 @@ async function playStation(which){
    if (playing > -1) output.sendMessage([144,stations[playing],0]);
    exec('mpc play '+(which+1));
    playing = which;
-   fs.writeFileSync("playing", playing, function() {});
+//   fs.writeFileSync("playing", playing, function() {});
    output.sendMessage([144,stations[playing],1]);
 }
 
@@ -58,16 +35,18 @@ var playAfterRestart=function(which){
 
 var pauseStation = function(){
    paused = !paused;
-   fs.writeFile("playing", paused ? -1 : playing, function() {});
+//   fs.writeFile("playing", paused ? -1 : playing, function() {});
    exec('mpc '+(paused ? 'pause' : 'play'));
    output.sendMessage([144,stations[playing],paused ? 0 : 1]);
 }
 
+/*
 try {
   var test = fs.readFileSync('playing', 'utf8', function() {}); 
   console.log("restarting "+test);
   if (test  > -1) playAfterRestart(test);
 } catch (e) {}
+*/
 
 input.on('message', (deltaTime, message) => {
    if (message[0]==144) {
