@@ -26,6 +26,8 @@ pi@raspberrypi:~/piradio $ mpc add http://stream2.srr.ro:8022
 pi@raspberrypi:~/piradio $ mpc add https://listen2.argentinetangoradio.com
 pi@raspberrypi:~/piradio $ mpc add https://tsfjazz.ice.infomaniak.ch/tsfjazz-high.mp3
 pi@raspberrypi:~/piradio $ mpc save internetradio
+mpc single on
+mpc repeat on
 
 
 TODO: Look at http://tinycorelinux.net/ports.html
