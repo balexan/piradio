@@ -11,6 +11,9 @@ network={
  psk="..."
 }
 
+passwd
+copy .ssh/id_rsa.pub to .ssh/authorized_keys
+
 git clone git@github.com:balexan/piradio.git
 sudo apt install nodejs
 ssh-keygen
