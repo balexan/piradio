@@ -11,6 +11,9 @@ network={
  psk="..."
 }
 
+passwd
+copy .ssh/id_rsa.pub to .ssh/authorized_keys
+
 git clone git@github.com:balexan/piradio.git
 sudo apt install nodejs
 ssh-keygen
@@ -26,6 +29,8 @@ pi@raspberrypi:~/piradio $ mpc add http://stream2.srr.ro:8022
 pi@raspberrypi:~/piradio $ mpc add https://listen2.argentinetangoradio.com
 pi@raspberrypi:~/piradio $ mpc add https://tsfjazz.ice.infomaniak.ch/tsfjazz-high.mp3
 pi@raspberrypi:~/piradio $ mpc save internetradio
+mpc single on
+mpc repeat on
 
 
 TODO: Look at http://tinycorelinux.net/ports.html
@@ -51,6 +56,10 @@ sudo systemctl restart piradio.service
 
 https://pimylifeup.com/raspberry-pi-spotify/
 https://appcodelabs.com/7-easy-steps-to-apple-airplay-on-raspberry-pi
+
+sudo apt-get install libpcsclite1 libpcsclite-dev
+sudo apt-get install pcscd
+ npm install nfc-pcsc --save
 
 
 
