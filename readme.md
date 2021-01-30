@@ -57,5 +57,9 @@ sudo systemctl restart piradio.service
 https://pimylifeup.com/raspberry-pi-spotify/
 https://appcodelabs.com/7-easy-steps-to-apple-airplay-on-raspberry-pi
 
+sudo apt-get install libpcsclite1 libpcsclite-dev
+sudo apt-get install pcscd
+ npm install nfc-pcsc --save
+
 
 
