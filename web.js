@@ -13,6 +13,8 @@ var playing = -1;
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 
+exec('mpc load internetradio');
+
 async function setVolume(vol) {
   const { stdout, stderr } = await exec('amixer -c 0  sset Headphone '+vol+'%');
   if (stderr) console.log('stderr:', stderr);
