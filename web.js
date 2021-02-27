@@ -14,6 +14,7 @@ const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 
 exec('mpc load internetradio');
+exec('mpc repeat on');
 
 async function setVolume(vol) {
   const { stdout, stderr } = await exec('amixer -c 0  sset Headphone '+vol+'%');
@@ -38,7 +39,7 @@ var playAfterRestart=function(which){
 var pauseStation = function(){
    paused = !paused;
 //   fs.writeFile("playing", paused ? -1 : playing, function() {});
-   exec('mpc '+(paused ? 'pause' : 'play'));
+   exec('mpc '+(paused ? 'stop' : 'play'));
    output.sendMessage([144,stations[playing],paused ? 0 : 1]);
 }
 
