@@ -59,7 +59,8 @@ https://appcodelabs.com/7-easy-steps-to-apple-airplay-on-raspberry-pi
 
 sudo apt-get install libpcsclite1 libpcsclite-dev
 sudo apt-get install pcscd
- npm install nfc-pcsc --save
+npm install nfc-pcsc --save
 
-
+sudo crontab -e
+*/5 * * * /home/pi/piradio/checkmpd.sh > /home/pi/piradio/cronlog 2>&1
 

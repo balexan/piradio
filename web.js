@@ -1,12 +1,8 @@
 const express = require("express");
 const app = express();
-const midi = require('midi');
-//const fs = require('fs');
 const stations = [56,57,58]
-var paused = false;
-const output = new midi.Output();
-output.openPort(1);
-const input = new midi.Input();
+var paused = true;
+var volume = 70;
 var player = null;
 var playing = -1;
 
@@ -15,6 +11,19 @@ const exec = util.promisify(require('child_process').exec);
 
 exec('mpc load internetradio');
 exec('mpc repeat on');
+setVolume(volume);
+
+var mqtt = require('mqtt')
+var client  = mqtt.connect('mqtt://localhost')
+
+ 
+client.on('connect', function () {
+  client.subscribe('zigbee2mqtt/0xbc33acfffed6666d', function (err,granted) {
+    if (err) {
+      console.log(err)
+   }
+  })
+})
 
 async function setVolume(vol) {
   const { stdout, stderr } = await exec('amixer -c 0  sset Headphone '+vol+'%');
@@ -22,61 +31,37 @@ async function setVolume(vol) {
 }
 
 async function playStation(which){
-   if (playing > -1) output.sendMessage([144,stations[playing],0]);
    exec('mpc play '+(which+1));
-   playing = which;
-//   fs.writeFileSync("playing", playing, function() {});
-   output.sendMessage([144,stations[playing],1]);
-}
-
-var playAfterRestart=function(which){
    playing = which;
    paused = false;
-   output.sendMessage([144,stations[playing],1]);
-   exec('mpc play '+(which+1));
+   client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "ON"}');
 }
 
 var pauseStation = function(){
-   paused = !paused;
-//   fs.writeFile("playing", paused ? -1 : playing, function() {});
-   exec('mpc '+(paused ? 'stop' : 'play'));
-   output.sendMessage([144,stations[playing],paused ? 0 : 1]);
+   if (playing == -1){
+     playStation(0);
+   } else {
+     paused = !paused;
+     client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "'+(paused ? 'OFF' : 'ON')+'"}');
+     exec('mpc '+(paused ? 'stop' : 'play'));
+   }
 }
 
-/*
-try {
-  var test = fs.readFileSync('playing', 'utf8', function() {}); 
-  console.log("restarting "+test);
-  if (test  > -1) playAfterRestart(test);
-} catch (e) {}
-*/
+client.on('message', function (topic, message) {
+  var action = JSON.parse(message.toString()).action
+  if (action == "toggle") pauseStation()
+  if (action == "arrow_left_click") playStation(0)
+  if (action == "arrow_right_click") playStation(1)
+  if (action == "brightness_up_click") {
+     if (volume < 96) volume = volume + 5;
+     setVolume(volume);
+  }
+ if (action == "brightness_down_click") {
+     if (volume > 5) volume = volume - 5;
+     setVolume(volume);
+  }
 
-input.on('message', (deltaTime, message) => {
-   if (message[0]==144) {
-      if (message[1]==7){
-         exec("sudo shutdown -r now");
-      }
-      for (var i=0; i<stations.length; i++){
-         if (message[1]==stations[i]) {
-            if (i != playing){
-               playStation(i)
-            } else {
-               pauseStation();
-            }
-         }
-      }
-   }
-   if (message[0]==176 && message[1]==48){
-      var vol = message[2];
-      var lvol = parseInt(vol/127*100);
-      console.log("Vol: "+lvol);
-      setVolume(lvol);
-   }
-   // console.log(`m: ${message}`);
-});
-
-input.openPort(1);
-input.ignoreTypes(true, true, true);
+})
 
 app.use(express.static("/home/pi/piradio/public"));
 
