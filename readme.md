@@ -64,3 +64,16 @@ npm install nfc-pcsc --save
 sudo crontab -e
 */5 * * * /home/pi/piradio/checkmpd.sh > /home/pi/piradio/cronlog 2>&1
 
+
+USB soundcard setup:
+sudo nano /etc/mpd.conf 
+audio_output {
+        type            "alsa"
+        name            "USB"
+#       device          "hw:0,1"        # optional
+        mixer_type      "software"      # optional
+#       mixer_device    "default"       # optional
+#       mixer_control   "PCM"           # optional
+#       mixer_index     "0"             # optional
+}
+
