@@ -26,7 +26,8 @@ client.on('connect', function () {
 })
 
 async function setVolume(vol) {
-  const { stdout, stderr } = await exec('amixer -c 0  sset Headphone '+vol+'%');
+  const lnvol =  Math.round((2*vol+Math.log10(vol+1)*50)/3)
+  const { stdout, stderr } = await exec('mpc volume '+lnvol);
   if (stderr) console.log('stderr:', stderr);
 }
 
@@ -74,6 +75,14 @@ app.get("/1", function(req,res) { playStation(1); res.send("ok"); });
 app.get("/2", function(req,res) { playStation(2); res.send("ok"); });
 app.get("/vol/:vol", function(req,res) { var vol = req.params.vol; setVolume(vol); console.log("volume "+vol); res.send("ok"); });
 app.get("/pause", function(req,res) { pauseStation(); res.send("ok"); });
+app.get("/on", function(req,res) { 
+   client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "ON"}');
+   res.send("ok");
+});
+app.get("/off", function(req,res) { 
+   client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "OFF"}');
+   res.send("ok");
+});
 app.get("/status",function(req,res) {exec("mpc status",(err,stdout,stderr)=>{res.send(stdout)})})
 
 const listener = app.listen(
