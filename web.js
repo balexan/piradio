@@ -73,7 +73,7 @@ app.get("/", function(request, response) {
 app.get("/0", function(req,res) { playStation(0); res.send("ok"); });
 app.get("/1", function(req,res) { playStation(1); res.send("ok"); });
 app.get("/2", function(req,res) { playStation(2); res.send("ok"); });
-app.get("/vol/:vol", function(req,res) { var vol = req.params.vol; setVolume(vol); console.log("volume "+vol); res.send("ok"); });
+app.get("/vol/:vol", function(req,res) { volumw = req.params.vol; setVolume(volume); res.send("ok"); });
 app.get("/pause", function(req,res) { pauseStation(); res.send("ok"); });
 app.get("/on", function(req,res) { 
    client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "ON"}');
