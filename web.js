@@ -83,7 +83,7 @@ command.stdout.on('data', (data) => {
   if (data.toString().startsWith('Exit Active State.')) {
       setTimeout(()=>{
         if (Date.now() > lastplay + 15*60*1000) client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "OFF"}');
-      }
+      },15*60*1000)
   }
 });
 
