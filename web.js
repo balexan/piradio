@@ -5,9 +5,11 @@ var paused = true;
 var volume = 70;
 var player = null;
 var playing = -1;
+var lastplay = 0;
 
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
+const fs = require('fs');
 
 exec('mpc load internetradio');
 exec('mpc repeat on');
@@ -36,6 +38,7 @@ async function playStation(which){
    playing = which;
    paused = false;
    client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "ON"}');
+   lastplay = Date.now()
 }
 
 var pauseStation = function(){
@@ -63,6 +66,37 @@ client.on('message', function (topic, message) {
   }
 
 })
+
+
+const { spawn } = require('child_process');
+const readStream = fs.createReadStream('/tmp/shairport-sync-metadata');
+const command = spawn('shairport-sync-metadata-reader');
+
+readStream.pipe(command.stdin);
+command.stdout.on('data', (data) => {
+  if (data.toString().startsWith('Enter Active State.')) {
+      client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "ON"}');
+      exec('mpc stop');
+      paused=true;
+      lastplay=Date.now();
+  }
+  if (data.toString().startsWith('Exit Active State.')) {
+      setTimeout(()=>{
+        if (Date.now() > lastplay + 15*60*1000) client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "OFF"}');
+      }
+  }
+});
+
+command.stderr.on('data', (data) => {
+  console.error(`stderr: ${data}`);
+});
+
+
+
+
+
+
+
 
 app.use(express.static("/home/pi/piradio/public"));
 
