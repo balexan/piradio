@@ -10,6 +10,8 @@ var lastplay = 0;
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const fs = require('fs');
+const path = require('path');
+const querystring = require('querystring');
 
 exec('mpc load internetradio');
 exec('mpc repeat on');
@@ -17,7 +19,6 @@ setVolume(volume);
 
 var mqtt = require('mqtt')
 var client  = mqtt.connect('mqtt://localhost')
-
  
 client.on('connect', function () {
   client.subscribe('zigbee2mqtt/0xbc33acfffed6666d', function (err,granted) {
@@ -64,9 +65,7 @@ client.on('message', function (topic, message) {
      if (volume > 5) volume = volume - 5;
      setVolume(volume);
   }
-
 })
-
 
 const { spawn } = require('child_process');
 const readStream = fs.createReadStream('/tmp/shairport-sync-metadata');
@@ -91,13 +90,6 @@ command.stderr.on('data', (data) => {
   console.error(`stderr: ${data}`);
 });
 
-
-
-
-
-
-
-
 app.use(express.static("/home/pi/piradio/public"));
 
 app.get("/", function(request, response) {
@@ -107,7 +99,7 @@ app.get("/", function(request, response) {
 app.get("/0", function(req,res) { playStation(0); res.send("ok"); });
 app.get("/1", function(req,res) { playStation(1); res.send("ok"); });
 app.get("/2", function(req,res) { playStation(2); res.send("ok"); });
-app.get("/vol/:vol", function(req,res) { volume = req.params.vol; setVolume(volume); res.send("ok"); });
+app.get("/vol/:vol", function(req,res) { volume = parseInt(req.params.vol); setVolume(volume); res.send("ok"); });
 app.get("/pause", function(req,res) { pauseStation(); res.send("ok"); });
 app.get("/on", function(req,res) { 
    client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "ON"}');
@@ -118,6 +110,36 @@ app.get("/off", function(req,res) {
    res.send("ok");
 });
 app.get("/status",function(req,res) {exec("mpc status",(err,stdout,stderr)=>{res.send(stdout)})})
+app.get("/tango", function(req,res) { 
+  const folderPath = "/media/exfat";
+  fs.readdir(folderPath, { withFileTypes: true }, (err, files) => {
+      if (err) return res.status(500).send({ error: err});
+      let dirs = files.filter(file => file.isDirectory()).map(dir => dir.name);
+      res.json(dirs);
+  });
+});
+app.get("/tangodir.html", function(request, response) {
+  response.sendFile(__dirname + "/views/tangodir.html");
+});
+app.get("/tangosongs", function(request, res) {
+  const dir = querystring.unescape(request.query.dir)
+  const folderPath = "/media/exfat/"+request.query.dir;
+  fs.readdir(folderPath, { withFileTypes: true }, (err, files) => {
+      if (err) return res.status(500).send({ error: err});
+      let dirs = files.map(dir => dir.name);
+      res.json(dirs);
+  });
+});
+app.get("/playTango", function(req, res) {
+  const dir = querystring.unescape(req.query.dir) // .replace(/'/g, "\'\'");
+  const song = querystring.unescape(req.query.song) // .replace(/'/g, "\'\'");
+  client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "ON"}');
+  exec('mpc clear')
+  exec(`mpc add "/media/exfat/${dir}/${song}"`)
+  exec('mpc play')
+  res.send('ok')
+
+})
 
 const listener = app.listen(
 80, function() {
