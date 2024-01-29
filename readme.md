@@ -77,3 +77,15 @@ audio_output {
 #       mixer_index     "0"             # optional
 }
 
+
+boot exfat:
+sudo apt install exfat-fuse
+sudo apt install exfatprogs
+sudo mkdir /media/exfat
+sudo mount -t exfat /dev/sda1 /media/exfat
+
+sudo blkid
+sudo nano /etc/fstab
+UUID=CA1C-06BC /media/exfat exfat defaults,auto,umask=000,users,rw 0 0 
+
+
