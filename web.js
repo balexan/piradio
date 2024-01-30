@@ -4,15 +4,16 @@ const stations = [56,57,58]
 var paused = true;
 var volume = 70;
 var player = null;
-var playing = -1;
+var playing = 0;
 var lastplay = 0;
+var radio=true;
 
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const fs = require('fs');
 const path = require('path');
 const querystring = require('querystring');
-
+exec('mpc clear');
 exec('mpc load internetradio');
 exec('mpc repeat on');
 setVolume(volume);
@@ -35,6 +36,8 @@ async function setVolume(vol) {
 }
 
 async function playStation(which){
+   exec('mpc clear');
+   exec('mpc load internetradio');  
    exec('mpc play '+(which+1));
    playing = which;
    paused = false;
@@ -42,21 +45,36 @@ async function playStation(which){
    lastplay = Date.now()
 }
 
-var pauseStation = function(){
-   if (playing == -1){
-     playStation(0);
-   } else {
-     paused = !paused;
-     client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "'+(paused ? 'OFF' : 'ON')+'"}');
-     exec('mpc '+(paused ? 'stop' : 'play'));
-   }
+var playpause = function(){
+  paused = !paused;
+  if (paused) {
+    exec('mpc stop');
+    if (!radio){
+      exec('mpc clear')
+      exec('mpc load internetradio')
+      radio = true
+    }
+    setTimeout(()=>{
+      if (Date.now() > lastplay + 15*60*1000) client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "OFF"}');
+    },15*60*1000)
+  } else {
+    client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "ON"}');
+    exec('mpc play');
+  }
 }
 
 client.on('message', function (topic, message) {
   var action = JSON.parse(message.toString()).action
-  if (action == "toggle") pauseStation()
-  if (action == "arrow_left_click") playStation(0)
-  if (action == "arrow_right_click") playStation(1)
+  if (action == "toggle") playpause()
+  if (action == "arrow_left_click") {
+    if (paused) playStation(0);
+    else exec('mpc prev')
+  }
+
+  if (action == "arrow_right_click") {
+    if (paused) playStation(1);
+    else exec('mpc next')
+  }
   if (action == "brightness_up_click") {
      if (volume < 96) volume = volume + 5;
      setVolume(volume);
@@ -100,15 +118,18 @@ app.get("/0", function(req,res) { playStation(0); res.send("ok"); });
 app.get("/1", function(req,res) { playStation(1); res.send("ok"); });
 app.get("/2", function(req,res) { playStation(2); res.send("ok"); });
 app.get("/vol/:vol", function(req,res) { volume = parseInt(req.params.vol); setVolume(volume); res.send("ok"); });
-app.get("/pause", function(req,res) { pauseStation(); res.send("ok"); });
+app.get("/pause", function(req,res) { playpause(); res.send("ok"); });
 app.get("/on", function(req,res) { 
    client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "ON"}');
    res.send("ok");
+   lastplay=Date.now();
 });
+
 app.get("/off", function(req,res) { 
    client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "OFF"}');
    res.send("ok");
 });
+
 app.get("/status",function(req,res) {exec("mpc status",(err,stdout,stderr)=>{res.send(stdout)})})
 app.get("/tango", function(req,res) { 
   const folderPath = "/media/exfat";
@@ -118,9 +139,11 @@ app.get("/tango", function(req,res) {
       res.json(dirs);
   });
 });
+
 app.get("/tangodir.html", function(request, response) {
   response.sendFile(__dirname + "/views/tangodir.html");
 });
+
 app.get("/tangosongs", function(request, res) {
   const dir = querystring.unescape(request.query.dir)
   const folderPath = "/media/exfat/"+request.query.dir;
@@ -130,19 +153,28 @@ app.get("/tangosongs", function(request, res) {
       res.json(dirs);
   });
 });
+
 app.get("/playTango", function(req, res) {
   const dir = querystring.unescape(req.query.dir) // .replace(/'/g, "\'\'");
   const song = querystring.unescape(req.query.song) // .replace(/'/g, "\'\'");
   client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "ON"}');
-  exec('mpc clear')
-  exec(`mpc add "/media/exfat/${dir}/${song}"`)
-  exec('mpc play')
-  res.send('ok')
 
+  const folderPath = "/media/exfat/"+req.query.dir;
+  fs.readdir(folderPath, { withFileTypes: true }, (err, files) => {
+    if (err) return res.status(500).send({ error: err});
+    exec ('mpc clear')
+    let songs = files.map((f,i) => {
+      exec(`mpc add "/media/exfat/${dir}/${f.name}"`)
+      if (f.name == song) exec (`mpc play ${i}`)
+      paused = false
+      radio = false
+    })
+  });
+  lastplay=Date.now()
+  res.send('ok')
 })
 
-const listener = app.listen(
-80, function() {
+const listener = app.listen(80, function() {
   console.log("Your app is listening on port " + listener.address().port);
 });
 
