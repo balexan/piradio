@@ -135,7 +135,13 @@ app.get("/tango", function(req,res) {
   const folderPath = "/media/exfat";
   fs.readdir(folderPath, { withFileTypes: true }, (err, files) => {
       if (err) return res.status(500).send({ error: err});
-      let dirs = files.filter(file => file.isDirectory()).map(dir => dir.name);
+      let dirs={}
+      for (let f of files){
+          if (f.name.endsWith('- Tango')) dirs[f.name.slice(0,-8)] = { ...dirs[f.name.slice(0,-8)],tango: f.name}
+          else if (f.name.endsWith('- Vals')) dirs[f.name.slice(0,-7)] = { ...dirs[f.name.slice(0,-7)],vals: f.name}
+          else if (f.name.endsWith('- Milonga')) dirs[f.name.slice(0,-10)] = { ...dirs[f.name.slice(0,-10)],milonga: f.name}
+          else dirs[f.name]={other: f.name}
+      }
       res.json(dirs);
   });
 });
@@ -165,7 +171,7 @@ app.get("/playTango", function(req, res) {
     exec ('mpc clear')
     let songs = files.map((f,i) => {
       exec(`mpc add "/media/exfat/${dir}/${f.name}"`)
-      if (f.name == song) exec (`mpc play ${i}`)
+      if (f.name == song) exec (`mpc play ${i+1}`)
       paused = false
       radio = false
     })
