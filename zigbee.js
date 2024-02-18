@@ -1,4 +1,4 @@
-var mqtt = require('mqtt')
+import mqtt from 'mqtt';
 var client  = mqtt.connect('mqtt://localhost')
 import { piradio, state } from "./piradio.js"
 var lastplay = 0

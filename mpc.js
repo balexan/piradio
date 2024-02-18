@@ -8,7 +8,7 @@ piradio.on('volume', async (vol) => {
     if (state.type=='radio' || state.type =='file'){
         const lnvol =  Math.round((2*vol+Math.log10(vol+1)*50)/3)
         const { stdout, stderr } = await exec('mpc volume '+lnvol);
-        if (stderr) console.log('stderr:', stderr);
+        if (stderr) state.errors.push('stderr:'+ stderr);
     }
 })
 

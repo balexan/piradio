@@ -56,13 +56,6 @@ app.get('/callback', async(req, res)=>{
 })
 
 app.get('/playSpotify', async function(req, res){       
-  /*  
-    spotifyApi.getMyDevices()
-    .then(async function(data) {
-        let availableDevices = data.body.devices;
-        let livingRoomId = availableDevices.filter(d=>d.name=='Living Room')[0].id
-        console.log('Living Room ID: '+livingRoomId)
-      */
     try {
         await spotifyApi.transferMyPlayback([livingRoomId])
         await spotifyApi.play({ "context_uri": "spotify:"+req.query.what  })
@@ -70,16 +63,14 @@ app.get('/playSpotify', async function(req, res){
     } catch (e) { state.errors.push("spotify "+e)}
 });
 
-//})
-
 piradio.on('next', async ()=>{
-    if (state.type='spotify') await spotifyApi.skipToNext()
+    if (state.type=='spotify') await spotifyApi.skipToNext()
 })
 
 piradio.on('prev', async ()=>{
-    if (state.type='spotify') await spotifyApi.skipToPrevious()
+    if (state.type=='spotify') await spotifyApi.skipToPrevious()
 })
 
 piradio.on('volume', async (vol)=>{
-    if (state.type='spotify') await spotifyApi.setVolume(vol)
+    if (state.type=='spotify') await spotifyApi.setVolume(vol)
 })

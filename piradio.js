@@ -20,6 +20,7 @@ class piRadioClass extends EventEmitter {
             await import('./spotify.js')
             await import('./tango.js')
             await import('./airplay.js')
+            await import('./zigbee.js')
         }
         importThem()
     }
@@ -29,7 +30,6 @@ export const piradio = new piRadioClass();
 
 piradio.on('playpause', () => {
     if (state.paused){
-        console.log(state.station == -1 ? 0 : state.station)
         piradio.emit('play', {type: 'radio', station: state.station == -1 ? 0 : state.station}); 
     } else {
         piradio.emit('pause'); 
