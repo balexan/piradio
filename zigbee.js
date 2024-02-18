@@ -25,23 +25,24 @@ client.on('message', function (topic, message) {
 piradio.on('play',()=>{
     lastplay=Date.now();
     client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "ON"}');
-    state.ampon = true
+    piradio.emit("ampon",true)
 })
 
 piradio.on('on',()=>{
     client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "ON"}');
-    state.ampon = true
+    piradio.emit("ampon",true)
 })
 
 piradio.on('off',()=>{
     client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "OFF"}');
-    state.ampon = false
+    piradio.emit("ampon",false)
 })
 
 piradio.on('pause',()=>{
     setTimeout(()=>{
-        if (Date.now() > lastplay + 15*60*1000) 
-        client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "OFF"}');
-        state.ampon = false
+        if (Date.now() > lastplay + 15*60*1000) {
+            client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "OFF"}');
+            piradio.emit("ampon",false)
+        }
     },15*60*1000)
 })

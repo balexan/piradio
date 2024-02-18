@@ -1,12 +1,12 @@
+import express from "express"
+export const app = express();
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-import {app} from "./webinterface.js"
-import { piradio, state } from "./piradio.js"
 import * as fs from 'fs';
 const querystring = require("querystring")
 const SpotifyWebApi = require("spotify-web-api-node");
 
-let livingRoomId="ce209d6834e61e7b16445fe3def1e6e4f777c415"
+let livingRoomId="c7b60f3edf3318e80575d5e28c1ce24aa99a9025"
 let client_id= "2c77aeb70d644c20a3dc05abae8ed720"
 let clientSecret= "2b0f0b84a3b34509854e48e07708d565"
 
@@ -21,20 +21,15 @@ const spotifyApi = new SpotifyWebApi({
     redirectUri: redirect_uri
 })
 
-async function doInitalStuff(){
-
-        spotifyApi.setRefreshToken(token_data.refresh_token);
-        let data = await spotifyApi.refreshAccessToken() 
-        spotifyApi.setAccessToken(data.body['access_token']);
-}
 let token_data = require('./spotify.json')
 
-doInitalStuff()
+spotifyApi.setAccessToken(token_data.access_token);
+spotifyApi.setRefreshToken(token_data.refresh_token);
 
 app.get('/login', function(req, res) {
 
   var state = "whatever"
-  var scope = 'user-read-private user-library-read user-read-email user-read-playback-state user-modify-playback-state';
+  var scope = 'user-read-private user-read-email user-read-playback-state user-modify-playback-state';
 
   res.redirect('https://accounts.spotify.com/authorize?' +
     querystring.stringify({
@@ -67,17 +62,6 @@ app.get('/callback', async(req, res)=>{
     } catch (e) { state.errors.push("spotify "+e)}
 })
 
-app.get('/playSpotify', async function(req, res){       
-    try {
-        await spotifyApi.transferMyPlayback([livingRoomId])
-        await spotifyApi.play({ "context_uri": "spotify:"+req.query.what  })
-        piradio.emit("play",{type: "spotify", what: req.query.what})
-        let current = await spotifyApi.getMyCurrentPlayingTrack()
-        console.log(current.body.item.album)
-        res.send('<html><body><img src="'+current.body.item.album.images[0].url+'">')
-    } catch (e) { state.errors.push("spotify "+e)}
-});
-
 app.get('/devices', async (req,res)=>{
     spotifyApi.getMyDevices()
     .then(async function(data) {
@@ -85,31 +69,5 @@ app.get('/devices', async (req,res)=>{
     })
 })
 
-app.get('/favouriteAlbums', async (req,res)=>{
-    spotifyApi.getMySavedAlbums({
-        limit : 50,
-        offset: 0
-      })
-    .then(async function(data) {
-        res.send(data)
-    }, function(err) {
-    console.log('Something went wrong!', err);
-  })
-})
 
-piradio.on('next', async ()=>{
-    if (state.type=='spotify') await spotifyApi.skipToNext()
-})
-
-piradio.on('prev', async ()=>{
-    if (state.type=='spotify') await spotifyApi.skipToPrevious()
-})
-
-piradio.on('volume', async (vol)=>{
-    if (state.type=='spotify') await spotifyApi.setVolume(vol)
-})
-
-piradio.on('pause', async (vol)=>{
-    if (state.type=='spotify') await spotifyApi.pause()
-})
-
+const listener = app.listen(1234, function() { console.log("Web server running"); });

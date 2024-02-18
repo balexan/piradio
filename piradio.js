@@ -49,10 +49,12 @@ piradio.on('play', (what) => {
         }
         state.radio=false
     }
+    piradio.emit('statechange',state)
 });
 
 piradio.on('pause', () => {
     state.paused = true
+    piradio.emit('statechange',state)
 });
 
 piradio.on('volumeup', () => {
@@ -65,5 +67,10 @@ piradio.on('volumedown', () => {
 
 piradio.on('volume', (vol) => {
     state.volume = vol
+    piradio.emit('statechange',state)
 });
 
+piradio.on('ampon', (on) => {
+    state.ampon = on
+    piradio.emit('statechange',state)
+});
