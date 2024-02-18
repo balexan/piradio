@@ -1,0 +1,33 @@
+<head>
+</head>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+      let params = new URLSearchParams(location.search); 
+      let dir = params.get("item"); 
+      var url = "/tangosongs?dir="+dir;
+    
+      fetch(url)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("HTTP error " + response.status);
+          }
+          return response.json();
+        })
+        .then(json => {
+          var div = document.getElementById('tango');
+          json.forEach(item => {
+            var a = document.createElement('a');
+            a.textContent = item;
+            a.href = '/playTango?dir='+encodeURIComponent(dir)+'&song='+encodeURIComponent(item);
+            div.appendChild(document.createElement('br'));  
+            div.appendChild(a);
+          });
+        })
+        .catch(err => {
+          console.log('Fetch Error :-S', err);
+        });
+    });
+    </script>
+<body>
+    <div id="tango"></div>
+</body>

@@ -1,0 +1,28 @@
+{
+  "name": "piradio",
+  "version": "1.0.0",
+  "description": "Imager from here https://www.raspberrypi.org/software/",
+  "main": "piradio.js",
+  "type": "module",
+  "dependencies": {
+    "express": "^4.17.1",
+    "midi": "^1.0.0",
+    "mqtt": "^4.2.6",
+    "spotify-web-api-node": "^5.0.2",
+    "querystring": "^0.2.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/balexan/piradio.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/balexan/piradio/issues"
+  },
+  "homepage": "https://github.com/balexan/piradio#readme"
+}

@@ -57,8 +57,61 @@ margin: 3px;
 padding: 10px;
 }
 
-
+.space{
+  margin:5px;
+}
 </style>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  var url = "/tango";
+
+  fetch(url)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("HTTP error " + response.status);
+      }
+      return response.json();
+    })
+    .then(json => {
+      var div = document.getElementById('tango');
+          for (let item in json){
+            var line = document.createElement('div')
+            var name = document.createElement('span')
+            name.textContent=item
+
+            var tango = document.createElement('a');
+            tango.classList.add('space')
+            tango.textContent = 'Tango';
+            tango.href = '/tangodir.html?item='+encodeURIComponent(json[item].tango);
+
+            var milonga = document.createElement('a');
+            milonga.textContent = 'Milonga';
+            milonga.classList.add('space')
+            milonga.href = '/tangodir.html?item='+encodeURIComponent(json[item].milonga);
+
+            var vals = document.createElement('a');
+            vals.textContent = 'Vals';
+            vals.classList.add('space')
+            vals.href = '/tangodir.html?item='+encodeURIComponent(json[item].vals);
+
+            var mixed = document.createElement('a');
+            mixed.textContent = 'Mixed';
+            mixed.classList.add('space')
+            mixed.href = '/tangodir.html?item='+encodeURIComponent(json[item].other);
+
+            line.appendChild(name)
+            if (json[item].tango) line.appendChild(tango);
+            if (json[item].milonga) line.appendChild(milonga);
+            if (json[item].vals) line.appendChild(vals);
+            if (json[item].other) line.appendChild(mixed);
+            div.appendChild(line)
+          };
+    })
+    .catch(err => {
+      console.log('Fetch Error :-S', err);
+    });
+});
+</script>
   <body>
     <button onclick="fetch('/pause')"><img width="100px" src="pause.png"></button>
     <button onclick="fetch('/0')"><img width="120px" src="rrm.png" onclick="fetch('/0')"></button>  
@@ -70,4 +123,5 @@ padding: 10px;
   <div class="s2">
      <input type="range" min="1" max="100" value="50" class="s" id="myRange" oninput="fetch('/vol/'+this.value)"></input>
 </div>
+<div id="tango"></div>
 </html>
