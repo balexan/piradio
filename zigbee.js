@@ -28,6 +28,16 @@ piradio.on('play',()=>{
     state.ampon = true
 })
 
+piradio.on('on',()=>{
+    client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "ON"}');
+    state.ampon = true
+})
+
+piradio.on('off',()=>{
+    client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "OFF"}');
+    state.ampon = false
+})
+
 piradio.on('pause',()=>{
     setTimeout(()=>{
         if (Date.now() > lastplay + 15*60*1000) 

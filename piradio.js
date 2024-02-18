@@ -3,7 +3,7 @@ import EventEmitter from 'node:events';
 export let state= {
     paused: false,
     station: -1,
-    volume: 80,
+    volume: 20,
     ampon: false,
     type: "radio",
     song: '',
@@ -39,14 +39,14 @@ piradio.on('playpause', () => {
 piradio.on('play', (what) => {
     state.radio = what.type == 'radio' 
     state.type = what.type
-    state.station = what.station
     state.paused = false
     if (what.type=='radio'){
         state.station = what.station
-    }
-    else if (what.type=='file'){
-        state.song=what.song
-        state.list=what.list
+    } else {
+        if (what.type=='file'){
+            state.song=what.song
+            state.list=what.list
+        }
         state.radio=false
     }
 });

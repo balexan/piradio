@@ -20,7 +20,7 @@ piradio.on('play', async (what) => {
         await exec('mpc play '+(what.station+1));
     } else if (what.type == 'file'){
         await exec('mpc clear');
-        what.list.map(async (f)=>{ await exec('mpc add '+f)})
+        what.list.map(async (f)=>{ await exec('mpc add "'+f+'"')})
         await exec('mpc play '+what.song);
     } else {
         await exec('mpc stop');
