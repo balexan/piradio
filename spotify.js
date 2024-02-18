@@ -2,7 +2,7 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 import {app} from "./webinterface.js"
 import { piradio, state } from "./piradio.js"
-
+import * as fs from 'fs';
 const querystring = require("querystring")
 const SpotifyWebApi = require("spotify-web-api-node");
 
@@ -15,16 +15,16 @@ let token='BQBc4HJkHpxFZgETFiYOAh_GGpUH-ssHooV40zMoCGmAhF_U97sksnnpGSeRijl5inGuN
 let refresh_token='AQCdROcpKPownlZuZbyk_0DANQUXXw6jeOvJlbyXMzu4DNzv7zJvgTM81KYyaOjSsaHMylIDUBVWvFQrQdPWPaTKZ0RRaxixErqVQqVRaqPRC-lbXLSYqmvsijy-3T70Ol4'
 
 
-    const spotifyApi = new SpotifyWebApi({
+const spotifyApi = new SpotifyWebApi({
     clientId: "2c77aeb70d644c20a3dc05abae8ed720",
     clientSecret: "2b0f0b84a3b34509854e48e07708d565",
     redirectUri: redirect_uri
-    })
+})
 
-try{
-    spotifyApi.setAccessToken(token);
-    spotifyApi.setRefreshToken(refresh_token);
-} catch (e) {}
+let token_data = require('./spotify.json')
+
+spotifyApi.setAccessToken(token_data.access_token);
+spotifyApi.setRefreshToken(token_data.refresh_token);
 
 app.get('/login', function(req, res) {
 
@@ -43,14 +43,21 @@ app.get('/login', function(req, res) {
 
 app.get('/callback', async(req, res)=>{
     try {
-        spotifyApi.authorizationCodeGrant(req.query.code, async (data)=>{
+        spotifyApi.authorizationCodeGrant(req.query.code)
+        .then(async (data)=>{
             console.log('The token expires in ' + data.body['expires_in']);
             console.log('The access token is ' + data.body['access_token']);
             console.log('The refresh token is ' + data.body['refresh_token']);
             
             spotifyApi.setAccessToken(data.body['access_token']);
             spotifyApi.setRefreshToken(data.body['refresh_token']);
+            fs.writeFile('spotify.json',JSON.stringify(data.body,null,2),(err) => {
+                if (err) throw err;
+                console.log('The file has been saved!');
+              });  
             res.send('ok')
+        }, (error)=>{
+            console.log("Error "+error)
         })
     } catch (e) { state.errors.push("spotify "+e)}
 })
@@ -59,6 +66,7 @@ app.get('/playSpotify', async function(req, res){
     try {
         await spotifyApi.transferMyPlayback([livingRoomId])
         await spotifyApi.play({ "context_uri": "spotify:"+req.query.what  })
+        piradio.emit("play",{type: "spotify", what: req.query.what})
         res.send('playing')
     } catch (e) { state.errors.push("spotify "+e)}
 });
@@ -73,4 +81,8 @@ piradio.on('prev', async ()=>{
 
 piradio.on('volume', async (vol)=>{
     if (state.type=='spotify') await spotifyApi.setVolume(vol)
+})
+
+piradio.on('pause', async (vol)=>{
+    if (state.type=='spotify') await spotifyApi.pause()
 })
