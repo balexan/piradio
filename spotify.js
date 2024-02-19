@@ -76,6 +76,7 @@ app.get('/playSpotify', async function(req, res){
         console.log(current.body.item.album)
         res.send('<html><body><img src="'+current.body.item.album.images[0].url+'">')
     } catch (e) { state.errors.push("spotify "+e)}
+    piradio.emit("play", {type: "spotify", what: req.query.what})
 });
 
 app.get('/devices', async (req,res)=>{
@@ -113,3 +114,6 @@ piradio.on('pause', async (vol)=>{
     if (state.type=='spotify') await spotifyApi.pause()
 })
 
+piradio.on('play', async (vol)=>{
+    if (state.type!='spotify') await spotifyApi.pause()
+})
