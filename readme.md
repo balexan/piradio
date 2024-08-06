@@ -7,8 +7,8 @@ update_config=1
 country=DE
 
 network={
- ssid="..."
- psk="..."
+ssid="..."
+psk="..."
 }
 
 passwd
@@ -24,32 +24,22 @@ sudo apt-get install mpd mpc
 sudo apt install node, npm
 sudo node web
 
-
-pi@raspberrypi:~/piradio $ mpc add http://stream2.srr.ro:8022
-pi@raspberrypi:~/piradio $ mpc add https://listen2.argentinetangoradio.com
-pi@raspberrypi:~/piradio $ mpc add https://tsfjazz.ice.infomaniak.ch/tsfjazz-high.mp3
-pi@raspberrypi:~/piradio $ mpc save internetradio
-mpc single on
-mpc repeat on
-
-
 TODO: Look at http://tinycorelinux.net/ports.html
-
 
 https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-startup/
 sudo nano /lib/systemd/system/piradio.service
- [Unit]
- Description=Pi Radio
- After=multi-user.target
+[Unit]
+Description=Pi Radio
+After=multi-user.target
 
- [Service]
- Type=idle
- ExecStart=/usr/bin/node /home/pi/piradio/web
+[Service]
+Type=idle
+ExecStart=/usr/bin/node /home/pi/piradio/web
 
- [Install]
- WantedBy=multi-user.target
+[Install]
+WantedBy=multi-user.target
 
-sudo chmod 644 /lib/systemd/system/piradio.service 
+sudo chmod 644 /lib/systemd/system/piradio.service
 sudo reboot
 
 sudo systemctl restart piradio.service
@@ -62,21 +52,25 @@ sudo apt-get install pcscd
 npm install nfc-pcsc --save
 
 sudo crontab -e
-*/5 * * * /home/pi/piradio/checkmpd.sh > /home/pi/piradio/cronlog 2>&1
-
+_/5 _ \* \* /home/pi/piradio/checkmpd.sh > /home/pi/piradio/cronlog 2>&1
 
 USB soundcard setup:
-sudo nano /etc/mpd.conf 
+sudo nano /etc/mpd.conf
 audio_output {
-        type            "alsa"
-        name            "USB"
-#       device          "hw:0,1"        # optional
-        mixer_type      "software"      # optional
-#       mixer_device    "default"       # optional
-#       mixer_control   "PCM"           # optional
-#       mixer_index     "0"             # optional
-}
+type "alsa"
+name "USB"
 
+# device "hw:0,1" # optional
+
+        mixer_type      "software"      # optional
+
+# mixer_device "default" # optional
+
+# mixer_control "PCM" # optional
+
+# mixer_index "0" # optional
+
+}
 
 boot exfat:
 sudo apt install exfat-fuse
@@ -86,6 +80,4 @@ sudo mount -t exfat /dev/sda1 /media/exfat
 
 sudo blkid
 sudo nano /etc/fstab
-UUID=CA1C-06BC /media/exfat exfat defaults,auto,umask=000,users,rw 0 0 
-
-
+UUID=CA1C-06BC /media/exfat exfat defaults,auto,umask=000,users,rw 0 0
