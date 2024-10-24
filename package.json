@@ -6,7 +6,6 @@
   "type": "module",
   "dependencies": {
     "express": "^4.17.1",
-    "midi": "^1.0.0",
     "mqtt": "^4.2.6",
     "spotify-web-api-node": "^5.0.2",
     "querystring": "^0.2.1"
