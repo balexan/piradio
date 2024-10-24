@@ -4,7 +4,7 @@ export const app = express();
 import { URL } from 'url';
 const __dirname = new URL('.', import.meta.url).pathname;
 
-app.use(express.static("/home/pi/piradio/public"));
+app.use(express.static(__dirname +"/public"));
 
 app.get("/", function(request, response) {
     response.sendFile(__dirname + "/views/index.html");
