@@ -14,6 +14,44 @@ psk="..."
 passwd
 copy .ssh/id_rsa.pub to .ssh/authorized_keys
 
+sudo apt install -y mosquitto mosquitto-clients
+sudo systemctl enable mosquitto.service
+
+sudo mkdir /opt/zigbee2mqtt
+sudo chown -R ${USER}: /opt/zigbee2mqtt
+git clone --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
+cd /opt/zigbee2mqtt
+npm ci
+npm run build
+cp /opt/zigbee2mqtt/data/configuration.example.yaml /opt/zigbee2mqtt/data/configuration.yaml
+nano /opt/zigbee2mqtt/data/configuration.yaml
+# add permit_join: true on top
+
+sudo nano /etc/systemd/system/zigbee2mqtt.service
+
+[Unit]
+Description=zigbee2mqtt
+After=network.target
+
+[Service]
+Environment=NODE_ENV=production
+Type=notify
+ExecStart=/usr/bin/node index.js
+WorkingDirectory=/opt/zigbee2mqtt
+StandardOutput=inherit
+# Or use StandardOutput=null if you don't want Zigbee2MQTT messages filling syslog, for more options see systemd.exec(5)
+StandardError=inherit
+WatchdogSec=10s
+Restart=always
+RestartSec=10s
+User=pi
+
+[Install]
+WantedBy=multi-user.target
+
+sudo systemctl start zigbee2mqtt
+
+
 git clone git@github.com:balexan/piradio.git
 sudo apt install nodejs
 ssh-keygen
@@ -21,7 +59,6 @@ add key to github
 sudo apt-get install libasound2-dev
 sudo apt-get install alsa-utils
 sudo apt-get install mpd mpc
-sudo apt install node, npm
 sudo node web
 
 TODO: Look at http://tinycorelinux.net/ports.html
