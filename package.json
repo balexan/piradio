@@ -7,10 +7,9 @@
   "dependencies": {
     "express": "^4.17.1",
     "mqtt": "^4.2.6",
-    "spotify-web-api-node": "^5.0.2",
-    "querystring": "^0.2.1"
+    "querystring": "^0.2.1",
+    "spotify-web-api-node": "^5.0.2"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

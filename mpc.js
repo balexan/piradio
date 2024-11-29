@@ -4,7 +4,6 @@ import { exec as exec_nonpromise } from "child_process";
 const exec = util.promisify(exec_nonpromise);
 const stations = [
   "http://stream2.srr.ro:8022",
-  "https://listen2.argentinetangoradio.com",
   "https://tsfjazz.ice.infomaniak.ch/tsfjazz-high.mp3",
 ];
 
