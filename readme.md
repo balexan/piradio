@@ -56,6 +56,7 @@ git clone git@github.com:balexan/piradio.git
 sudo apt install nodejs
 ssh-keygen
 add key to github
+
 sudo apt-get install libasound2-dev
 sudo apt-get install alsa-utils
 sudo apt-get install mpd mpc
