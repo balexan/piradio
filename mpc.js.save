@@ -4,16 +4,15 @@ import { exec as exec_nonpromise } from "child_process";
 const exec = util.promisify(exec_nonpromise);
 const stations = [
   "http://stream2.srr.ro:8022",
+  "https://listen2.argentinetangoradio.com",
   "https://tsfjazz.ice.infomaniak.ch/tsfjazz-high.mp3",
 ];
 
-const stations20 = stations.flatMap(item => Array(20).fill(item));
-await exec("mpc clear");
-for (let s of stations20) await exec("mpc add "+s);
-await exec("mpc repeat on");
-
 async function playStation(stationNr) {
-  await exec("mpc play "+(stationNr*20+1));
+  await exec("mpc clear");
+  await exec("mpc repeat on");
+  await exec("mpc add " + stations[stationNr]);
+  await exec("mpc play");
 }
 
 piradio.on("volume", async (vol) => {
