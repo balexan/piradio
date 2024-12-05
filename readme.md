@@ -119,3 +119,9 @@ sudo mount -t exfat /dev/sda1 /media/exfat
 sudo blkid
 sudo nano /etc/fstab
 UUID=CA1C-06BC /media/exfat exfat defaults,auto,umask=000,users,rw 0 0
+
+airplay and spotify:
+clone repo `git clone https://github.com/nicokaiser/rpi-audio-receiver.git`
+cd ...; ./sh_install
+If you want a quick fix for your local environment open /etc/raspotify/conf and just set LIBRESPORT_AUTOPLAY to on or off:
+LIBRESPOT_AUTOPLAY=on
