@@ -125,3 +125,9 @@ clone repo `git clone https://github.com/nicokaiser/rpi-audio-receiver.git`
 cd ...; ./sh_install
 If you want a quick fix for your local environment open /etc/raspotify/conf and just set LIBRESPORT_AUTOPLAY to on or off:
 LIBRESPOT_AUTOPLAY=on
+
+Shairpoint sync:
+# apt update
+# apt upgrade # this is optional but recommended
+# apt-get install --no-install-recommends build-essential git autoconf automake libtool \
+    libpopt-dev libconfig-dev libasound2-dev avahi-daemon libavahi-client-dev libssl-dev libsoxr-dev
