@@ -4,7 +4,8 @@ import { exec as exec_nonpromise } from "child_process";
 const exec = util.promisify(exec_nonpromise);
 const stations = [
   "http://stream2.srr.ro:8022",
-  "https://tsfjazz.ice.infomaniak.ch/tsfjazz-high.mp3",
+  "https://ais-edge94-nyc04.cdnstream.com/2202_128.mp3",
+  "https://tsfjazz.ice.infomaniak.ch/tsfjazz-high.mp3"
 ];
 
 const stations20 = stations.flatMap(item => Array(20).fill(item));

@@ -21,7 +21,7 @@ class piRadioClass extends EventEmitter {
 //            await import('./spotify.js')
 //            await import('./tango.js')
 //            await import('./airplay.js')
-//            await import('./zigbee.js')
+            await import('./zigbee.js')
         }
         importThem()
     }

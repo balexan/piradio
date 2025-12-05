@@ -4,7 +4,7 @@ import { piradio, state } from "./piradio.js"
 var lastplay = 0
 
 client.on('connect', function () {
-  client.subscribe('zigbee2mqtt/0xbc33acfffed6666d', function (err,granted) {
+  client.subscribe('zigbee2mqtt/remote', function (err,granted) {
     if (err) {
       state.errors.push('zigbee: '+err)
    }
@@ -24,24 +24,24 @@ client.on('message', function (topic, message) {
 
 piradio.on('play',()=>{
     lastplay=Date.now();
-    client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "ON"}');
+    client.publish('zigbee2mqtt/amp/set', '{"state": "ON"}');
     piradio.emit("ampon",true)
 })
 
 piradio.on('on',()=>{
-    client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "ON"}');
+    client.publish('zigbee2mqtt/amp/set', '{"state": "ON"}');
     piradio.emit("ampon",true)
 })
 
 piradio.on('off',()=>{
-    client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "OFF"}');
+    client.publish('zigbee2mqtt/amp/set', '{"state": "OFF"}');
     piradio.emit("ampon",false)
 })
 
 piradio.on('pause',()=>{
     setTimeout(()=>{
         if (Date.now() > lastplay + 15*60*1000) {
-            client.publish('zigbee2mqtt/0x847127fffefd603c/set', '{"state": "OFF"}');
+            client.publish('zigbee2mqtt/amp/set', '{"state": "OFF"}');
             piradio.emit("ampon",false)
         }
     },15*60*1000)
