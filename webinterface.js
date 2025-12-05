@@ -1,8 +1,13 @@
 import express from "express"
 import { piradio, state } from "./piradio.js"
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 export const app = express();
 import { URL } from 'url';
 const __dirname = new URL('.', import.meta.url).pathname;
+
+const server = createServer(app);
+const io = new Server(server);
 
 app.use(express.static(__dirname +"/public"));
 
@@ -19,4 +24,21 @@ app.get("/on", function(req,res) { piradio.emit('on'); res.send("ok"); });
 app.get("/off", function(req,res) { piradio.emit('off'); res.send("ok"); });
 app.get("/status",function(req,res) {res.send(JSON.stringify(state))})
 
-const listener = app.listen(80, function() { console.log("Web server running"); });
+// WebSocket handling
+io.on('connection', (socket) => {
+  console.log('Client connected');
+  
+  // Send current state to newly connected client
+  socket.emit('status', state);
+  
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
+  });
+});
+
+// Listen for state changes and broadcast to all connected clients
+piradio.on('statechange', (newState) => {
+  io.emit('status', newState);
+});
+
+const listener = server.listen(80, function() { console.log("Web server running with WebSocket support"); });

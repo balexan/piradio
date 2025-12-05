@@ -60,9 +60,114 @@ padding: 10px;
 .space{
   margin:5px;
 }
+
+.status{
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background: #f5f5f5;
+}
+
+.pause-button{
+  border: 3px solid #ccc;
+}
+
+.pause-button.paused{
+  border: 8px solid #ff4444;
+}
+
+.pause-button.playing{
+  border: 8px solid #44ff44;
+}
+
+.radio-button{
+  border: 3px solid #ccc;
+}
+
+.radio-button.selected{
+  border: 8px solid #4444ff;
+}
+
+.amp-button{
+  border: 3px solid #ccc;
+}
+
+.amp-button.on{
+  border: 8px solid #ff8800;
+}
+
+.amp-button.off{
+  border: 8px solid #888888;
+}
 </style>
+<script src="/socket.io/socket.io.js"></script>
 <script>
+let socket;
+let updating = false; // Flag to prevent circular updates
+
+function updateStatus(status) {
+  document.getElementById('status-station').textContent = status.station;
+  document.getElementById('status-volume').textContent = status.volume;
+  document.getElementById('status-paused').textContent = status.paused ? 'Yes' : 'No';
+  document.getElementById('status-type').textContent = status.type;
+  document.getElementById('status-song').textContent = status.song || 'N/A';
+  document.getElementById('status-ampon').textContent = status.ampon ? 'On' : 'Off';
+  
+  // Update volume slider without triggering change event
+  const volumeSlider = document.getElementById('myRange');
+  updating = true;
+  volumeSlider.value = status.volume;
+  updating = false;
+  
+  // Update pause button appearance based on paused status
+  const pauseButton = document.getElementById('pauseButton');
+  if (status.paused) {
+    pauseButton.className = 'pause-button paused';
+  } else {
+    pauseButton.className = 'pause-button playing';
+  }
+  
+  // Update radio button borders based on selected station
+  const radioButtons = ['radio0', 'radio1', 'radio2'];
+  radioButtons.forEach((buttonId, index) => {
+    const button = document.getElementById(buttonId);
+    if (status.type === 'radio' && status.station === index) {
+      button.className = 'radio-button selected';
+    } else {
+      button.className = 'radio-button';
+    }
+  });
+  
+  // Update amp button borders based on amp status
+  const ampOnButton = document.getElementById('ampOn');
+  const ampOffButton = document.getElementById('ampOff');
+  if (status.ampon) {
+    ampOnButton.className = 'amp-button on';
+    ampOffButton.className = 'amp-button';
+  } else {
+    ampOnButton.className = 'amp-button';
+    ampOffButton.className = 'amp-button off';
+  }
+}
+
 document.addEventListener("DOMContentLoaded", function() {
+  // Initialize WebSocket connection
+  socket = io();
+  
+  socket.on('connect', function() {
+    console.log('Connected to server');
+  });
+  
+  socket.on('status', function(status) {
+    console.log('Status update received:', status);
+    updateStatus(status);
+  });
+  
+  socket.on('disconnect', function() {
+    console.log('Disconnected from server');
+  });
+
   var url = "/tango";
 
   fetch(url)
@@ -144,15 +249,24 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
   <body>
-    <button onclick="fetch('/pause')"><img width="100px" src="pause.png"></button>
-    <button onclick="fetch('/0')"><img width="120px" src="rrm.png" onclick="fetch('/0')"></button>  
-    <button onclick="fetch('/1')"><img width="120px" src="atr.png" onclick="fetch('/1')"></button>  
-    <button onclick="fetch('/2')"><img width="100px" src="jrf.png" onclick="fetch('/2')"></button>  
-     <button onclick="fetch('/on')">ON</button>
-  <button onclick="fetch('/off')">OFF</button>
+    <button id="pauseButton" class="pause-button" onclick="fetch('/pause')"><img width="100px" src="pause.png"></button>
+    <button id="radio0" class="radio-button" onclick="fetch('/0')"><img width="120px" src="rrm.png" onclick="fetch('/0')"></button>  
+    <button id="radio1" class="radio-button" onclick="fetch('/1')"><img width="120px" src="atr.png" onclick="fetch('/1')"></button>  
+    <button id="radio2" class="radio-button" onclick="fetch('/2')"><img width="100px" src="jrf.png" onclick="fetch('/2')"></button>  
+     <button id="ampOn" class="amp-button" onclick="fetch('/on')">ON</button>
+  <button id="ampOff" class="amp-button" onclick="fetch('/off')">OFF</button>
   </body>
   <div class="s2">
-     <input type="range" min="1" max="100" value="50" class="s" id="myRange" oninput="fetch('/vol/'+this.value)"></input>
+     <input type="range" min="1" max="100" value="50" class="s" id="myRange" oninput="if(!updating) fetch('/vol/'+this.value)"></input>
+</div>
+<div class="status">
+  <h3>Current Status</h3>
+  <p><strong>Station:</strong> <span id="status-station">-</span></p>
+  <p><strong>Volume:</strong> <span id="status-volume">-</span></p>
+  <p><strong>Paused:</strong> <span id="status-paused">-</span></p>
+  <p><strong>Type:</strong> <span id="status-type">-</span></p>
+  <p><strong>Song:</strong> <span id="status-song">-</span></p>
+  <p><strong>Amp On:</strong> <span id="status-ampon">-</span></p>
 </div>
 <div id="favourites"></div>
 <div id="tango"></div>
